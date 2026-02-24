@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.RelativeLayout
 import android.widget.ScrollView
 import android.widget.TextView
@@ -24,7 +25,7 @@ class WeatherActivity : AppCompatActivity() {
 
     private lateinit var weatherLayout: ScrollView
     private lateinit var nowLayout: RelativeLayout
-    private lateinit var forecastLayout: MaterialCardView
+    private lateinit var forecastLayout: LinearLayout
     private lateinit var lifeIndexLayout: MaterialCardView
 
     private lateinit var placeName: TextView
@@ -69,7 +70,7 @@ class WeatherActivity : AppCompatActivity() {
     private fun initViews() {
         // 全局变量binding可以直接访问控件
         nowLayout = weatherLayout.findViewById<RelativeLayout>(R.id.nowLayout)
-        forecastLayout = weatherLayout.findViewById<MaterialCardView>(R.id.forecastLayout)
+        forecastLayout = weatherLayout.findViewById<LinearLayout>(R.id.forecastLayout)
         lifeIndexLayout = weatherLayout.findViewById<MaterialCardView>(R.id.lifeIndexLayout)
         placeName = weatherLayout.findViewById<TextView>(R.id.placeName)
         currentTemp = weatherLayout.findViewById<TextView>(R.id.currentTemp)

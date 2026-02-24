@@ -7,6 +7,7 @@ import com.gaogao.sunnyweather.android.logic.network.SunnyWeatherNetwork
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
 import kotlin.coroutines.CoroutineContext
 
 /**
@@ -53,6 +54,8 @@ object Repository {
                 val deferredRealtime = async {
                     SunnyWeatherNetwork.getRealtimeWeather(lng, lat)
                 }
+                // 这段代码是为了解决QPS=1的问题
+                delay(1000)
                 val deferredDaily = async {
                     SunnyWeatherNetwork.getDailyWeather(lng, lat)
                 }
