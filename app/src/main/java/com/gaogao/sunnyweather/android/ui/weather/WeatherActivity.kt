@@ -3,6 +3,7 @@ package com.gaogao.sunnyweather.android.ui.weather
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.RelativeLayout
@@ -10,11 +11,13 @@ import android.widget.ScrollView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.gaogao.sunnyweather.R
 import com.gaogao.sunnyweather.android.logic.model.Weather
 import com.gaogao.sunnyweather.android.logic.model.getSky
+import com.gaogao.sunnyweather.android.utils.ScreenUtils
 import com.google.android.material.card.MaterialCardView
 import java.text.SimpleDateFormat
 import java.util.Locale
@@ -44,6 +47,8 @@ class WeatherActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         // 使用binding进行绑定布局，更好的处理include进来的布局
         setContentView(R.layout.activity_weather)
+        // 调用工具类来实现
+        ScreenUtils.setImmersiveStatusBar(window, isDarkText = true)
         weatherLayout = findViewById<ScrollView>(R.id.weatherLayout)
         initViews()
         if (viewModel.locationLng.isEmpty()) {
