@@ -1,9 +1,13 @@
 package com.gaogao.sunnyweather.android.ui.weather
 
+import android.content.Context
 import android.os.Bundle
+import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.InputMethodManager
+import android.widget.Button
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.RelativeLayout
@@ -12,8 +16,11 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.ui.graphics.Color
+import androidx.core.view.GravityCompat
+import androidx.drawerlayout.widget.DrawerLayout
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.gaogao.sunnyweather.R
 import com.gaogao.sunnyweather.android.logic.model.Weather
 import com.gaogao.sunnyweather.android.logic.model.getSky
@@ -26,11 +33,14 @@ class WeatherActivity : AppCompatActivity() {
 
     val viewModel by lazy { ViewModelProvider(this).get(WeatherViewModel::class.java) }
 
+    public lateinit var drawerLayout: DrawerLayout
+    private lateinit var swipeRefresh: SwipeRefreshLayout
     private lateinit var weatherLayout: ScrollView
     private lateinit var nowLayout: RelativeLayout
     private lateinit var forecastLayout: LinearLayout
     private lateinit var lifeIndexLayout: MaterialCardView
 
+    private lateinit var navBtn: Button
     private lateinit var placeName: TextView
 
     private lateinit var currentTemp: TextView
@@ -49,6 +59,8 @@ class WeatherActivity : AppCompatActivity() {
         setContentView(R.layout.activity_weather)
         // 调用工具类来实现
         ScreenUtils.setImmersiveStatusBar(window, isDarkText = true)
+        drawerLayout = findViewById<DrawerLayout>(R.id.drawerLayout)
+        swipeRefresh = findViewById<SwipeRefreshLayout>(R.id.swipeRefresh)
         weatherLayout = findViewById<ScrollView>(R.id.weatherLayout)
         initViews()
         if (viewModel.locationLng.isEmpty()) {
@@ -68,8 +80,34 @@ class WeatherActivity : AppCompatActivity() {
                 Toast.makeText(this, "无法成功获取天气信息", Toast.LENGTH_SHORT).show()
                 result.exceptionOrNull()?.printStackTrace()
             }
+            swipeRefresh.isRefreshing = false
         })
+        swipeRefresh.setColorSchemeResources(com.google.android.material.R.color.design_default_color_primary)
+        refreshWeather()
+        swipeRefresh.setOnRefreshListener {
+            refreshWeather()
+        }
         viewModel.refreshWeather(viewModel.locationLng, viewModel.locationLat)
+        // 第一，在切换城市按钮的点击事件中调用DrawerLayout的openDrawer()方法来打开滑动菜单
+        navBtn.setOnClickListener {
+            drawerLayout.openDrawer(GravityCompat.START)
+        }
+        // 第二，监听DrawerLayout的状态，当滑动菜单被隐藏的时候，同时也要隐藏输入法
+        drawerLayout.addDrawerListener(object : DrawerLayout.DrawerListener {
+            override fun onDrawerSlide(drawerView: View, slideOffset: Float) {
+            }
+
+            override fun onDrawerOpened(drawerView: View) {
+            }
+
+            override fun onDrawerClosed(drawerView: View) {
+                val manager = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                manager.hideSoftInputFromWindow(drawerView.windowToken, InputMethodManager.HIDE_NOT_ALWAYS)
+            }
+
+            override fun onDrawerStateChanged(newState: Int) {
+            }
+        })
     }
 
     private fun initViews() {
@@ -77,6 +115,7 @@ class WeatherActivity : AppCompatActivity() {
         nowLayout = weatherLayout.findViewById<RelativeLayout>(R.id.nowLayout)
         forecastLayout = weatherLayout.findViewById<LinearLayout>(R.id.forecastLayout)
         lifeIndexLayout = weatherLayout.findViewById<MaterialCardView>(R.id.lifeIndexLayout)
+        navBtn = weatherLayout.findViewById<Button>(R.id.navBtn)
         placeName = weatherLayout.findViewById<TextView>(R.id.placeName)
         currentTemp = weatherLayout.findViewById<TextView>(R.id.currentTemp)
         currentSky = weatherLayout.findViewById<TextView>(R.id.currentSky)
@@ -125,5 +164,10 @@ class WeatherActivity : AppCompatActivity() {
         ultravioletText.text = lifeIndex.ultraviolet[0].desc
         carWashingText.text = lifeIndex.carWashing[0].desc
         weatherLayout.visibility = View.VISIBLE
+    }
+
+    fun refreshWeather() {
+        viewModel.refreshWeather(viewModel.locationLng, viewModel.locationLat)
+        swipeRefresh.isRefreshing = true
     }
 }
