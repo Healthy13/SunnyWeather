@@ -2,6 +2,8 @@ package com.gaogao.sunnyweather.android.logic
 
 import android.util.Log
 import androidx.lifecycle.liveData
+import com.gaogao.sunnyweather.android.logic.dao.PlaceDao
+import com.gaogao.sunnyweather.android.logic.model.Place
 import com.gaogao.sunnyweather.android.logic.model.Weather
 import com.gaogao.sunnyweather.android.logic.network.SunnyWeatherNetwork
 import kotlinx.coroutines.Dispatchers
@@ -39,6 +41,18 @@ object Repository {
         }
     }
 
+    /**
+     * 仓库层只是做了一层接口封装而已。其实这里的实现方式并不标准，因为即使是对
+     * SharedPreferences文件进行读写的操作，也是不太建议在主线程中进行，虽然它的执行速度
+     * 通常会很快。最佳的实现方式肯定还是开启一个线程来执行这些比较耗时的任务，然后通过
+     * LiveData对象进行数据返回
+     */
+    fun savaPlace(place: Place) = PlaceDao.savePlace(place)
+
+    fun getSavedPlace() = PlaceDao.getSavedPlace()
+
+    fun isPlaceSaved(): Boolean = PlaceDao.isPlaceSaved()
+
     /*
         获取实时天气信息和获取未来天气信息这两个请求是没有先后顺序的，因此让它们并发
      执行可以提升程序的运行效率，但是要在同时得到它们的响应结果后才能进一步执行程序。这
@@ -55,7 +69,7 @@ object Repository {
                     SunnyWeatherNetwork.getRealtimeWeather(lng, lat)
                 }
                 // 这段代码是为了解决QPS=1的问题
-                delay(1000)
+                delay(2000)
                 val deferredDaily = async {
                     SunnyWeatherNetwork.getDailyWeather(lng, lat)
                 }
